@@ -1,0 +1,305 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module client</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>client</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/edg/code/swpag-client/swpag_client/client.py">/home/edg/code/swpag-client/swpag_client/client.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;The&nbsp;SWPAG&nbsp;game&nbsp;client<br>
+Written&nbsp;by&nbsp;subwire&nbsp;and&nbsp;the&nbsp;SWPAG&nbsp;team,&nbsp;2017<br>
+&nbsp;<br>
+&nbsp;Because&nbsp;websites&nbsp;are&nbsp;so&nbsp;1995.<br>
+&nbsp;<br>
+This&nbsp;client&nbsp;lets&nbsp;you&nbsp;interact&nbsp;with&nbsp;the&nbsp;SWPAG&nbsp;game,&nbsp;including&nbsp;<br>
+getting&nbsp;the&nbsp;game&nbsp;status,&nbsp;obtaining&nbsp;a&nbsp;list&nbsp;of&nbsp;potential&nbsp;targets,&nbsp;and&nbsp;<br>
+submitting&nbsp;flags.<br>
+&nbsp;<br>
+To&nbsp;get&nbsp;started,&nbsp;you&nbsp;will&nbsp;have&nbsp;received&nbsp;a&nbsp;"flag&nbsp;token"&nbsp;with&nbsp;your&nbsp;game&nbsp;registration.<br>
+You&nbsp;may&nbsp;also&nbsp;need&nbsp;to&nbsp;know&nbsp;the&nbsp;URL&nbsp;of&nbsp;your&nbsp;game's&nbsp;"team&nbsp;interface".<br>
+Note&nbsp;that&nbsp;for&nbsp;some&nbsp;games&nbsp;(e.g.,&nbsp;iCTF)&nbsp;this&nbsp;will&nbsp;be&nbsp;automatically&nbsp;discovered&nbsp;for&nbsp;you.<br>
+You&nbsp;will&nbsp;also&nbsp;need&nbsp;access&nbsp;to&nbsp;your&nbsp;team's&nbsp;virtual&nbsp;machine,&nbsp;on&nbsp;which&nbsp;you&nbsp;should&nbsp;run&nbsp;the&nbsp;client.<br>
+&nbsp;<br>
+You&nbsp;are&nbsp;heavily&nbsp;encouraged&nbsp;to&nbsp;use&nbsp;this&nbsp;library&nbsp;to&nbsp;help&nbsp;you&nbsp;automate&nbsp;the&nbsp;exploitation&nbsp;of&nbsp;services<br>
+and&nbsp;the&nbsp;submission&nbsp;of&nbsp;flags.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;now&nbsp;do&nbsp;the&nbsp;following:<br>
+&nbsp;<br>
+For&nbsp;iCTF&nbsp;players:<br>
+&gt;&gt;&gt;&nbsp;from&nbsp;swpag_client&nbsp;import&nbsp;<a href="#Team">Team</a><br>
+&gt;&gt;&gt;&nbsp;t&nbsp;=&nbsp;<a href="#Team">Team</a>(None,&nbsp;"your_flag_token_here")<br>
+(this&nbsp;will&nbsp;auto-detect&nbsp;the&nbsp;team&nbsp;interface's&nbsp;address&nbsp;for&nbsp;you)<br>
+&nbsp;<br>
+For&nbsp;general&nbsp;SWPAG&nbsp;users:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;from&nbsp;swpag_client&nbsp;import&nbsp;<a href="#Team">Team</a><br>
+&gt;&gt;&gt;&nbsp;t&nbsp;=&nbsp;<a href="#Team">Team</a>("<a href="http://your.team.interface.hostname/">http://your.team.interface.hostname/</a>",&nbsp;"your_flag_token_here")<br>
+&nbsp;<br>
+With&nbsp;this&nbsp;team&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;you&nbsp;can&nbsp;then&nbsp;get&nbsp;game&nbsp;status&nbsp;information:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;t.get_game_status()<br>
+&nbsp;<br>
+This&nbsp;includes&nbsp;information&nbsp;on&nbsp;scores,&nbsp;teams,&nbsp;services,&nbsp;and&nbsp;timing&nbsp;information&nbsp;regarding&nbsp;the&nbsp;game's&nbsp;"ticks".<br>
+&nbsp;<br>
+Your&nbsp;first&nbsp;task&nbsp;will&nbsp;be&nbsp;to&nbsp;explore&nbsp;the&nbsp;game&nbsp;services&nbsp;which&nbsp;you&nbsp;must&nbsp;attack&nbsp;and&nbsp;defend,&nbsp;and&nbsp;find&nbsp;exploits<br>
+You&nbsp;will&nbsp;see&nbsp;them&nbsp;on&nbsp;your&nbsp;VM's&nbsp;filesystem,&nbsp;but&nbsp;to&nbsp;get&nbsp;a&nbsp;list&nbsp;of&nbsp;services&nbsp;with&nbsp;descriptions,&nbsp;you&nbsp;can&nbsp;run<br>
+&gt;&gt;&gt;&nbsp;t.get_service_list()<br>
+&nbsp;<br>
+This&nbsp;will&nbsp;produce&nbsp;a&nbsp;list&nbsp;of&nbsp;services,&nbsp;including&nbsp;the&nbsp;"service&nbsp;ID"&nbsp;of&nbsp;the&nbsp;service.<br>
+&nbsp;<br>
+Once&nbsp;you&nbsp;have&nbsp;reverse-engineered&nbsp;a&nbsp;service,&nbsp;and&nbsp;developed&nbsp;your&nbsp;new&nbsp;leet&nbsp;exploit,&nbsp;you&nbsp;then&nbsp;need&nbsp;to<br>
+obtain&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;other&nbsp;teams,&nbsp;which&nbsp;you&nbsp;can&nbsp;attack.<br>
+However,&nbsp;each&nbsp;service&nbsp;hosted&nbsp;by&nbsp;each&nbsp;team&nbsp;may&nbsp;contain&nbsp;multiple&nbsp;flags;&nbsp;in&nbsp;order&nbsp;to&nbsp;prove&nbsp;your&nbsp;<br>
+control&nbsp;over&nbsp;the&nbsp;vulnerable&nbsp;service,&nbsp;you&nbsp;must&nbsp;find&nbsp;the&nbsp;_correct_&nbsp;flag,&nbsp;which&nbsp;the&nbsp;game&nbsp;tells&nbsp;you&nbsp;to&nbsp;find.<br>
+Each&nbsp;flag&nbsp;is&nbsp;associated&nbsp;with&nbsp;a&nbsp;"flag&nbsp;ID",&nbsp;which&nbsp;gets&nbsp;cycled&nbsp;each&nbsp;game&nbsp;tick&nbsp;(see&nbsp;the&nbsp;game&nbsp;rules&nbsp;for<br>
+more&nbsp;details).&nbsp;&nbsp;Your&nbsp;exploit&nbsp;needs&nbsp;to&nbsp;then&nbsp;obtain&nbsp;the&nbsp;flag&nbsp;associated&nbsp;with&nbsp;a&nbsp;given&nbsp;flag&nbsp;ID,&nbsp;hosted<br>
+hosted&nbsp;by&nbsp;a&nbsp;given&nbsp;opponent&nbsp;team.<br>
+&nbsp;<br>
+With&nbsp;the&nbsp;service&nbsp;ID&nbsp;obtained&nbsp;above,&nbsp;you&nbsp;can&nbsp;then&nbsp;do&nbsp;the&nbsp;following:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;t.get_targets(service_id)<br>
+&nbsp;<br>
+This&nbsp;will&nbsp;return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;teams'&nbsp;IP&nbsp;addresses,&nbsp;port&nbsp;numbers,&nbsp;and&nbsp;flag&nbsp;IDs.<br>
+&nbsp;<br>
+Finally,&nbsp;you&nbsp;need&nbsp;to&nbsp;capture&nbsp;and&nbsp;submit&nbsp;some&nbsp;flags!<br>
+Once&nbsp;you've&nbsp;pwned&nbsp;the&nbsp;service,&nbsp;and&nbsp;captured&nbsp;the&nbsp;flag,&nbsp;all&nbsp;you&nbsp;need&nbsp;to&nbsp;do&nbsp;is:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;t.submit_flag("FLGxxxxxxxxxxxxx")<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;also&nbsp;submit&nbsp;a&nbsp;lot&nbsp;of&nbsp;flags&nbsp;at&nbsp;once:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;t.submit_flag(["FLGxxxxxxxxxxxxx",&nbsp;"FLGyyyyyyyyyyyyy",&nbsp;...])<br>
+&nbsp;<br>
+You'll&nbsp;get&nbsp;a&nbsp;status&nbsp;code&nbsp;(or&nbsp;a&nbsp;list&nbsp;of&nbsp;status&nbsp;codes)&nbsp;in&nbsp;return.<br>
+&nbsp;<br>
+The&nbsp;client&nbsp;can&nbsp;provide&nbsp;a&nbsp;wealth&nbsp;of&nbsp;information&nbsp;on&nbsp;the&nbsp;game,&nbsp;which&nbsp;is&nbsp;discussed&nbsp;in&nbsp;the&nbsp;documentation.<br>
+&nbsp;<br>
+Happy&nbsp;hacking!<br>
+&nbsp;<br>
+-&nbsp;the&nbsp;SWPAG&nbsp;team</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="base64.html">base64</a><br>
+</td><td width="25%" valign=top><a href="json.html">json</a><br>
+</td><td width="25%" valign=top><a href="random.html">random</a><br>
+</td><td width="25%" valign=top><a href="requests.html">requests</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="client.html#Team">Team</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Team">class <strong>Team</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;represents&nbsp;a&nbsp;logged-in&nbsp;iCTF&nbsp;team.<br>
+This&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;perform&nbsp;actions&nbsp;on&nbsp;behalf&nbsp;of&nbsp;the&nbsp;team,&nbsp;such&nbsp;as&nbsp;submitting&nbsp;game&nbsp;artifacts<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Team-__init__"><strong>__init__</strong></a>(self, game_url<font color="#909090">=None</font>, flag_token<font color="#909090">=None</font>)</dt><dd><tt>Create&nbsp;a&nbsp;<a href="#Team">Team</a>&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;use&nbsp;to&nbsp;interact&nbsp;with&nbsp;SWPAG&nbsp;as&nbsp;a&nbsp;team.<br>
+All&nbsp;you&nbsp;need&nbsp;to&nbsp;get&nbsp;started&nbsp;is&nbsp;the&nbsp;<a href="#Team">Team</a>&nbsp;Interface&nbsp;URL&nbsp;(don't&nbsp;forget&nbsp;the&nbsp;trailing&nbsp;/)&nbsp;and&nbsp;a&nbsp;token&nbsp;for&nbsp;your&nbsp;team.<br>
+&nbsp;<br>
+For&nbsp;example:<br>
+&nbsp;<br>
+from&nbsp;swpag&nbsp;import&nbsp;<a href="#Team">Team</a><br>
+t&nbsp;=&nbsp;<a href="#Team">Team</a>&nbsp;("<a href="http://team-interface-lsdkjflsj.shellweplayagame.org">http://team-interface-lsdkjflsj.shellweplayagame.org</a>",&nbsp;"lksjdflkjSDFJLK")<br>
+iCTF&nbsp;2018&nbsp;NOTE:<br>
+We&nbsp;love&nbsp;the&nbsp;cloud!&nbsp;We&nbsp;don't&nbsp;know&nbsp;where&nbsp;our&nbsp;team&nbsp;interface&nbsp;is&nbsp;either.<br>
+Use&nbsp;this&nbsp;altnernate&nbsp;form&nbsp;to&nbsp;automatically&nbsp;discover&nbsp;the&nbsp;game&nbsp;url:<br>
+from&nbsp;swpag&nbsp;import&nbsp;<a href="#Team">Team</a><br>
+t&nbsp;=&nbsp;<a href="#Team">Team</a>&nbsp;(None,&nbsp;"lksjdflkjSDFJLK")<br>
+&nbsp;<br>
+:param&nbsp;game_url:&nbsp;The&nbsp;URL&nbsp;to&nbsp;your&nbsp;<a href="#Team">Team</a>&nbsp;Interface.&nbsp;&nbsp;Don't&nbsp;forget&nbsp;a&nbsp;trailing&nbsp;/<br>
+:param&nbsp;flag_token:&nbsp;The&nbsp;Flag&nbsp;Token&nbsp;from&nbsp;the&nbsp;SWPAG&nbsp;website&nbsp;for&nbsp;your&nbsp;team.</tt></dd></dl>
+
+<dl><dt><a name="Team-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Team-bootstrap"><strong>bootstrap</strong></a>(self)</dt><dd><tt>Auto-bootstrap&nbsp;the&nbsp;<a href="#Team">Team</a>&nbsp;Interface&nbsp;location.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+:return:</tt></dd></dl>
+
+<dl><dt><a name="Team-get_game_status"><strong>get_game_status</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;containing&nbsp;game&nbsp;status&nbsp;information.<br>
+This&nbsp;will&nbsp;include:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;The&nbsp;scores&nbsp;of&nbsp;all&nbsp;teams<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Game&nbsp;timing&nbsp;information<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Information&nbsp;about&nbsp;services,&nbsp;including&nbsp;their&nbsp;status,&nbsp;number&nbsp;of&nbsp;exploitations,&nbsp;etc<br>
+&nbsp;<br>
+This&nbsp;API&nbsp;is&nbsp;suitable&nbsp;for&nbsp;use&nbsp;in&nbsp;the&nbsp;creation&nbsp;of&nbsp;frontends.<br>
+&nbsp;<br>
+The&nbsp;return&nbsp;value&nbsp;is&nbsp;a&nbsp;large&nbsp;dictionary,&nbsp;containing&nbsp;the&nbsp;following:<br>
+-&nbsp;'teams'&nbsp;:&nbsp;Basic&nbsp;team&nbsp;info,&nbsp;name,&nbsp;country,&nbsp;latitude,&nbsp;longitude,&nbsp;etc<br>
+-&nbsp;'service_states':&nbsp;For&nbsp;each&nbsp;team&nbsp;and&nbsp;service,&nbsp;provides&nbsp;its&nbsp;"state"&nbsp;(up/down/etc)<br>
+-&nbsp;'exploited_services':&nbsp;For&nbsp;each&nbsp;service&nbsp;that&nbsp;has&nbsp;been&nbsp;exploited,&nbsp;list&nbsp;who&nbsp;exploited&nbsp;it<br>
+-&nbsp;'first_bloods':&nbsp;For&nbsp;each&nbsp;service,&nbsp;which&nbsp;team&nbsp;scored&nbsp;on&nbsp;it&nbsp;first&nbsp;(they&nbsp;get&nbsp;extra&nbsp;points!)<br>
+-&nbsp;'scores':&nbsp;The&nbsp;scoring&nbsp;data&nbsp;for&nbsp;each&nbsp;team.<br>
+-&nbsp;'tick':&nbsp;Info&nbsp;about&nbsp;the&nbsp;game's&nbsp;current&nbsp;"tick"&nbsp;--&nbsp;see&nbsp;<a href="#Team-get_tick_info">get_tick_info</a>()<br>
+It&nbsp;will&nbsp;look&nbsp;something&nbsp;like:<br>
+&nbsp;<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'teams'&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;team_id&gt;&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'country'&nbsp;:&nbsp;"ISO&nbsp;2&nbsp;letter&nbsp;country&nbsp;code",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'logo'&nbsp;:&nbsp;&lt;base64&nbsp;logo&gt;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'name'&nbsp;:&nbsp;"1338-offbyone"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'url'&nbsp;:&nbsp;"<a href="http://teamurl.here">http://teamurl.here</a>"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'exploited_services'&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;service_id&gt;&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'service_name'&nbsp;:&nbsp;"string_service_name",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'teams'&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'team_id'&nbsp;:&nbsp;&lt;team_id&gt;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'team_name'&nbsp;:&nbsp;"string&nbsp;team&nbsp;name"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'total_stolen_flags'&nbsp;:&nbsp;&lt;integer&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'service_states'&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;team_id&gt;&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;service_id&gt;&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'service_name'&nbsp;:&nbsp;"string_service_name"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'service_state'&nbsp;:&nbsp;"untested"&nbsp;|&nbsp;"up"&nbsp;|&nbsp;"down"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'first_bloods'&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;service_id&gt;&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'created_on'&nbsp;:&nbsp;Timestamp&nbsp;eg.&nbsp;'2015-12-02&nbsp;10:57:49',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'team_id'&nbsp;:&nbsp;&lt;ID&nbsp;of&nbsp;exploiting&nbsp;team&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'scores'&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;team_id&gt;&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'attack_points'&nbsp;:&nbsp;&lt;float&nbsp;number&nbsp;of&nbsp;points&nbsp;scored&nbsp;through&nbsp;exploitation&gt;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'service_points'&nbsp;:&nbsp;&lt;float&nbsp;number&nbsp;of&nbsp;points&nbsp;for&nbsp;having&nbsp;a&nbsp;"cool"&nbsp;service,&nbsp;see&nbsp;rules&nbsp;for&nbsp;details&gt;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'sla'&nbsp;:&nbsp;&lt;float&nbsp;SLA&nbsp;score&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'total_points'&nbsp;:&nbsp;&lt;float&nbsp;normalized&nbsp;final&nbsp;score&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'tick'&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'approximate_seconds_left':&nbsp;&lt;int&nbsp;seconds&gt;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'created_on':&nbsp;Timestamp,&nbsp;like&nbsp;'2015-12-02&nbsp;12:28:03',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'tick_id':&nbsp;&lt;int&nbsp;tick&nbsp;ID&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+}</tt></dd></dl>
+
+<dl><dt><a name="Team-get_service_list"><strong>get_service_list</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;list&nbsp;of&nbsp;services,&nbsp;and&nbsp;some&nbsp;useful&nbsp;information&nbsp;about&nbsp;them.<br>
+&nbsp;<br>
+The&nbsp;output&nbsp;will&nbsp;look&nbsp;like:<br>
+&nbsp;<br>
+[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'service_id'&nbsp;:&nbsp;&lt;int&nbsp;service&nbsp;id&gt;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'team_id'&nbsp;:&nbsp;&lt;team_id&nbsp;which&nbsp;created&nbsp;that&nbsp;service&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'service_name'&nbsp;:&nbsp;"string&nbsp;service_name",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'description'&nbsp;:&nbsp;"Description&nbsp;of&nbsp;the&nbsp;service",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'flag_id_description'&nbsp;:&nbsp;"Description&nbsp;of&nbsp;the&nbsp;'flag_id'&nbsp;in&nbsp;this&nbsp;service,&nbsp;indicating&nbsp;which&nbsp;flag&nbsp;you&nbsp;should&nbsp;steal",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'port'&nbsp;:&nbsp;&lt;int&nbsp;port&nbsp;number&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+]</tt></dd></dl>
+
+<dl><dt><a name="Team-get_targets"><strong>get_targets</strong></a>(self, service)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;teams,&nbsp;their&nbsp;hostnames,&nbsp;and&nbsp;the&nbsp;currently&nbsp;valid&nbsp;flag_ids.<br>
+Your&nbsp;exploit&nbsp;should&nbsp;then&nbsp;try&nbsp;to&nbsp;exploit&nbsp;each&nbsp;team,&nbsp;and&nbsp;steal&nbsp;the&nbsp;flag&nbsp;with&nbsp;the&nbsp;given&nbsp;ID.<br>
+&nbsp;<br>
+You&nbsp;can/should&nbsp;use&nbsp;this&nbsp;to&nbsp;write&nbsp;scripts&nbsp;to&nbsp;run&nbsp;your&nbsp;exploits!<br>
+&nbsp;<br>
+:param&nbsp;service:&nbsp;The&nbsp;name&nbsp;or&nbsp;ID&nbsp;of&nbsp;a&nbsp;service&nbsp;(see&nbsp;<a href="#Team-get_service_list">get_service_list</a>()&nbsp;for&nbsp;IDs&nbsp;and&nbsp;names)<br>
+:return:&nbsp;A&nbsp;list&nbsp;of&nbsp;targets:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'team_name'&nbsp;:&nbsp;"<a href="#Team">Team</a>&nbsp;name",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'hostname'&nbsp;:&nbsp;"hostname",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'port'&nbsp;:&nbsp;&lt;int&nbsp;port&nbsp;number&gt;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'flag_id'&nbsp;:&nbsp;"Flag&nbsp;ID&nbsp;to&nbsp;steal"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;]</tt></dd></dl>
+
+<dl><dt><a name="Team-get_team_list"><strong>get_team_list</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;teams!</tt></dd></dl>
+
+<dl><dt><a name="Team-get_team_status"><strong>get_team_status</strong></a>(self)</dt><dd><tt>Get&nbsp;your&nbsp;team's&nbsp;current&nbsp;status</tt></dd></dl>
+
+<dl><dt><a name="Team-get_tick_info"><strong>get_tick_info</strong></a>(self)</dt><dd><tt>Return&nbsp;information&nbsp;about&nbsp;the&nbsp;current&nbsp;game&nbsp;"tick".<br>
+&nbsp;<br>
+The&nbsp;iCTF&nbsp;game&nbsp;is&nbsp;divided&nbsp;into&nbsp;rounds,&nbsp;called&nbsp;"ticks".&nbsp;&nbsp;Scoring&nbsp;is&nbsp;computed&nbsp;at&nbsp;the&nbsp;end&nbsp;of&nbsp;each&nbsp;tick.<br>
+New&nbsp;flags&nbsp;are&nbsp;set&nbsp;only&nbsp;at&nbsp;the&nbsp;next&nbsp;tick.<br>
+&nbsp;<br>
+If&nbsp;you're&nbsp;writing&nbsp;scripts&nbsp;or&nbsp;frontends,&nbsp;you&nbsp;should&nbsp;use&nbsp;this&nbsp;to&nbsp;figure&nbsp;out&nbsp;when&nbsp;to<br>
+run&nbsp;them.<br>
+&nbsp;<br>
+The&nbsp;format&nbsp;looks&nbsp;like:<br>
+{u'approximate_seconds_left':&nbsp;&lt;int&nbsp;seconds&gt;,<br>
+u'created_on':&nbsp;Timestamp,&nbsp;like&nbsp;u'2015-12-02&nbsp;12:28:03',<br>
+u'tick_id':&nbsp;&lt;int&nbsp;tick&nbsp;ID&gt;}</tt></dd></dl>
+
+<dl><dt><a name="Team-submit_flag"><strong>submit_flag</strong></a>(self, *args, **kwargs)</dt><dd><tt>Submit&nbsp;a&nbsp;list&nbsp;of&nbsp;one&nbsp;or&nbsp;more&nbsp;flags<br>
+note:&nbsp;Requires&nbsp;a&nbsp;flag&nbsp;token<br>
+:param&nbsp;flags:&nbsp;A&nbsp;list&nbsp;of&nbsp;flags<br>
+:return:&nbsp;List&nbsp;containing&nbsp;a&nbsp;response&nbsp;for&nbsp;each&nbsp;flag,&nbsp;either:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"correct"&nbsp;|&nbsp;"ownflag"&nbsp;(do&nbsp;you&nbsp;think&nbsp;this&nbsp;is&nbsp;defcon?)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;"incorrect"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;"alreadysubmitted"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;"notactive",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;"toomanyincorrect",</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-flag_token"><strong>flag_token</strong></a>(func)</dt></dl>
+ <dl><dt><a name="-input"><strong>input</strong></a> = raw_input(...)</dt><dd><tt>raw_input([prompt])&nbsp;-&gt;&nbsp;string<br>
+&nbsp;<br>
+Read&nbsp;a&nbsp;string&nbsp;from&nbsp;standard&nbsp;input.&nbsp;&nbsp;The&nbsp;trailing&nbsp;newline&nbsp;is&nbsp;stripped.<br>
+If&nbsp;the&nbsp;user&nbsp;hits&nbsp;EOF&nbsp;(Unix:&nbsp;Ctl-D,&nbsp;Windows:&nbsp;Ctl-Z+Return),&nbsp;raise&nbsp;EOFError.<br>
+On&nbsp;Unix,&nbsp;GNU&nbsp;readline&nbsp;is&nbsp;used&nbsp;if&nbsp;enabled.&nbsp;&nbsp;The&nbsp;prompt&nbsp;string,&nbsp;if&nbsp;given,<br>
+is&nbsp;printed&nbsp;without&nbsp;a&nbsp;trailing&nbsp;newline&nbsp;before&nbsp;reading.</tt></dd></dl>
+</td></tr></table>
+</body></html>
